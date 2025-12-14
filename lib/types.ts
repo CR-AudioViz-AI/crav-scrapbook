@@ -145,3 +145,21 @@ export interface Scrapbook {
   tags: string[];
   templateId: string | null;
 }
+
+// Editor State Types
+export interface EditorState {
+  selectedElementIds: string[];
+  activeTool: 'select' | 'text' | 'shape' | 'draw' | 'crop' | 'pan' | 'zoom';
+  zoom: number;
+  panOffset: Position;
+  showGrid: boolean;
+  snapToGrid: boolean;
+  gridSize: number;
+  showRulers: boolean;
+  showGuides: boolean;
+  guides: { type: 'horizontal' | 'vertical'; position: number }[];
+  clipboard: ScrapbookElement[] | null;
+  undoStack: ScrapbookPage[][];
+  redoStack: ScrapbookPage[][];
+  maxUndoSteps: number;
+}
