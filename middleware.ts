@@ -7,8 +7,8 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res })
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Protected routes
-  if (req.nextUrl.pathname.startsWith('/dashboard') || req.nextUrl.pathname.startsWith('/editor')) {
+  // Protected routes - dashboard only for now (editor open for testing)
+  if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
       return NextResponse.redirect(new URL('/login', req.url))
     }
@@ -25,5 +25,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/editor/:path*', '/login', '/signup'],
+  matcher: ['/dashboard/:path*', '/login', '/signup'],
 }
