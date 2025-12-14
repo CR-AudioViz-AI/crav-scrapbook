@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { useScrapbookStore } from '@/lib/store';
 import type { PhotoElement, TextElement, ShapeElement, ScrapbookElement } from '@/lib/types';
-import { Type, SlidersHorizontal, Box, Image, Layers, ChevronDown, ChevronRight, Move, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, SquareDashed, X } from 'lucide-react';
+import { Type, SlidersHorizontal, Box, Image, Layers, ChevronDown, ChevronRight, Move, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Square, X } from 'lucide-react';
 
 interface CollapsibleSectionProps { title: string; icon: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean; }
 function CollapsibleSection({ title, icon, children, defaultOpen = true }: CollapsibleSectionProps) {
@@ -144,7 +144,7 @@ export function PropertiesPanel() {
             </div>
           </CollapsibleSection>
         )}
-        <CollapsibleSection title="Border" icon={<SquareDashed className="w-4 h-4" />} defaultOpen={false}>
+        <CollapsibleSection title="Border" icon={<Square className="w-4 h-4" />} defaultOpen={false}>
           <div className="space-y-3">
             <label className="flex items-center gap-2"><input type="checkbox" checked={element.border.enabled} onChange={(e) => handleUpdate({ border: { ...element.border, enabled: e.target.checked } })} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" /><span className="text-sm">Enable Border</span></label>
             {element.border.enabled && (<><ColorPicker label="Border Color" value={element.border.color} onChange={(color) => handleUpdate({ border: { ...element.border, color } })} /><NumberInput label="Width" value={element.border.width} onChange={(width) => handleUpdate({ border: { ...element.border, width } })} min={1} max={20} unit="px" /><NumberInput label="Radius" value={element.border.radius} onChange={(radius) => handleUpdate({ border: { ...element.border, radius } })} min={0} max={100} unit="px" /></>)}
