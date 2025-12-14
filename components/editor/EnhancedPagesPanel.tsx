@@ -517,7 +517,7 @@ export function EnhancedPagesPanel() {
                 isActive={index === currentPageIndex}
                 onClick={() => setCurrentPage(index)}
                 onDuplicate={() => duplicatePage(index)}
-                onDelete={() => pages.length > 1 && deletePage(page.id)}
+                onDelete={() => pages.length > 1 && deletePage(index)}
               />
             ))}
           </AnimatePresence>
