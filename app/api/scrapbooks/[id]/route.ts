@@ -13,7 +13,7 @@ export async function GET(
     const supabase = createRouteHandlerClient({ cookies });
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch scrapbook with all related data
+    // Fetch scrapbook with pages and elements
     const { data: scrapbook, error } = await supabase
       .from('scrapbooks')
       .select(`
@@ -21,14 +21,6 @@ export async function GET(
         pages:scrapbook_pages(
           *,
           elements:scrapbook_elements(*)
-        ),
-        collaborators:scrapbook_collaborators(
-          *,
-          user:auth.users(email, raw_user_meta_data)
-        ),
-        comments:scrapbook_comments(
-          *,
-          user:auth.users(email, raw_user_meta_data)
         )
       `)
       .eq('id', params.id)
@@ -37,18 +29,32 @@ export async function GET(
       .single();
 
     if (error) throw error;
+    if (!scrapbook) {
+      return NextResponse.json({ error: 'Scrapbook not found' }, { status: 404 });
+    }
+
+    // Type assertion for scrapbook data
+    const scrapbookData = scrapbook as any;
 
     // Check access
-    const isOwner = user?.id === scrapbook.user_id;
-    const isCollaborator = scrapbook.collaborators?.some((c: any) => c.user_id === user?.id);
-    const isPublic = scrapbook.is_public;
+    const isOwner = user?.id === scrapbookData.user_id;
+    const isPublic = scrapbookData.is_public;
+
+    // Fetch collaborators separately
+    const { data: collaborators } = await supabase
+      .from('scrapbook_collaborators')
+      .select('*')
+      .eq('scrapbook_id', params.id);
+
+    const isCollaborator = collaborators?.some((c: any) => c.user_id === user?.id);
+    const canEdit = isOwner || collaborators?.some((c: any) => c.user_id === user?.id && c.role === 'editor');
 
     if (!isOwner && !isCollaborator && !isPublic) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     // Increment view count for non-owners
-    if (!isOwner) {
+    if (!isOwner && user) {
       await supabase.rpc('increment_view_count', { scrapbook_uuid: params.id });
     }
 
@@ -65,13 +71,15 @@ export async function GET(
     }
 
     return NextResponse.json({
-      ...scrapbook,
+      ...scrapbookData,
+      collaborators: collaborators || [],
       isOwner,
       isCollaborator,
       hasLiked,
-      canEdit: isOwner || scrapbook.collaborators?.some((c: any) => c.user_id === user?.id && c.role === 'editor')
+      canEdit
     });
   } catch (error: any) {
+    console.error('Scrapbook fetch error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -89,18 +97,19 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, description, isPublic, tags, coverImage } = body;
+    const updateData: any = {};
+    
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined) updateData.description = body.description;
+    if (body.isPublic !== undefined) updateData.is_public = body.isPublic;
+    if (body.tags !== undefined) updateData.tags = body.tags;
+    if (body.coverImage !== undefined) updateData.cover_image = body.coverImage;
+    
+    updateData.updated_at = new Date().toISOString();
 
     const { data: scrapbook, error } = await supabase
       .from('scrapbooks')
-      .update({
-        title,
-        description,
-        is_public: isPublic,
-        tags,
-        cover_image: coverImage,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', params.id)
       .select()
       .single();
