@@ -1,21 +1,22 @@
 // app/api/scrapbooks/[id]/duplicate/route.ts
 // Duplicate a scrapbook
 
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const supabase = getSupabase();
 
     // Fetch original scrapbook
     const { data: original, error: fetchError } = await supabase
@@ -34,11 +35,13 @@ export async function POST(
       return NextResponse.json({ error: 'Scrapbook not found' }, { status: 404 });
     }
 
-    // Create duplicate scrapbook
+    // Create duplicate scrapbook with anonymous user
+    const userId = 'anon_' + Math.random().toString(36).substring(2, 15);
+    
     const { data: newScrapbook, error: createError } = await supabase
       .from('scrapbooks')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         title: `${original.title} (Copy)`,
         description: original.description,
         page_width: original.page_width,
