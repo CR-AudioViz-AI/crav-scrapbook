@@ -199,7 +199,7 @@ const TEXT_EFFECTS: TextEffect[] = [
   },
 ];
 
-const CATEGORIES = [...new Set(TEXT_EFFECTS.map(e => e.category))];
+const CATEGORIES = Array.from(new Set(TEXT_EFFECTS.map(e => e.category)));
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
