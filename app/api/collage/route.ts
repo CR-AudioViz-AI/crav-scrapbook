@@ -247,7 +247,7 @@ const COLLAGE_LAYOUTS: CollageLayout[] = [
   },
 ];
 
-const CATEGORIES = [...new Set(COLLAGE_LAYOUTS.map(l => l.category))];
+const CATEGORIES = Array.from(new Set(COLLAGE_LAYOUTS.map(l => l.category)));
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
