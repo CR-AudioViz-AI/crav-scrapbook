@@ -220,7 +220,7 @@ const BACKGROUNDS: Background[] = [
   },
 ];
 
-const CATEGORIES = [...new Set(BACKGROUNDS.map(b => b.category))];
+const CATEGORIES = Array.from(new Set(BACKGROUNDS.map(b => b.category)));
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
