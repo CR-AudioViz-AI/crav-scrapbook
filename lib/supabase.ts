@@ -1,109 +1,48 @@
-import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
+// ============================================================================
+// UNIVERSAL SUPABASE CLIENT - CR AUDIOVIZ AI ECOSYSTEM
+// Centralized database connection for all apps
+// Dependency-free version (only requires @supabase/supabase-js)
+// ============================================================================
 
-export const createBrowserClient = () => {
-  return createClientComponentClient()
-}
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export const createServerClient = () => {
-  const cookieStore = cookies()
-  return createServerComponentClient({ cookies: () => cookieStore })
-}
+// Centralized Supabase configuration
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kteobfyferrukqeolofj.supabase.co';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZW9iZnlmZXJydWtxZW9sb2ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxOTcyNjYsImV4cCI6MjA3NzU1NzI2Nn0.uy-jlF_z6qVb8qogsNyGDLHqT4HhmdRhLrW7zPv3qhY';
 
-// Service role client for admin operations
-export const createServiceClient = () => {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
-}
+// Standard client for general use
+export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export type Database = {
-  public: {
-    Tables: {
-      scrapbooks: {
-        Row: {
-          id: string
-          user_id: string
-          title: string
-          description: string | null
-          cover_image: string | null
-          template_id: string | null
-          is_public: boolean
-          page_count: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['scrapbooks']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['scrapbooks']['Insert']>
-      }
-      scrapbook_pages: {
-        Row: {
-          id: string
-          scrapbook_id: string
-          page_number: number
-          background: any
-          elements: any[]
-          created_at: string
-          updated_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['scrapbook_pages']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['scrapbook_pages']['Insert']>
-      }
-      templates: {
-        Row: {
-          id: string
-          name: string
-          category: string
-          thumbnail: string
-          layout: any
-          is_premium: boolean
-          created_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['templates']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['templates']['Insert']>
-      }
-      embellishments: {
-        Row: {
-          id: string
-          name: string
-          category: string
-          image_url: string
-          is_premium: boolean
-          tags: string[]
-        }
-        Insert: Omit<Database['public']['Tables']['embellishments']['Row'], 'id'>
-        Update: Partial<Database['public']['Tables']['embellishments']['Insert']>
-      }
-      user_photos: {
-        Row: {
-          id: string
-          user_id: string
-          url: string
-          thumbnail_url: string
-          filename: string
-          size: number
-          uploaded_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['user_photos']['Row'], 'id' | 'uploaded_at'>
-        Update: Partial<Database['public']['Tables']['user_photos']['Insert']>
-      }
-      user_profiles: {
-        Row: {
-          id: string
-          user_id: string
-          display_name: string
-          avatar_url: string | null
-          bio: string | null
-          subscription_tier: string
-          storage_used: number
-          created_at: string
-        }
-        Insert: Omit<Database['public']['Tables']['user_profiles']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['user_profiles']['Insert']>
-      }
-    }
+// Browser client for auth (SSR-safe singleton pattern)
+let browserClient: SupabaseClient | null = null;
+
+export function createSupabaseBrowserClient(): SupabaseClient {
+  if (typeof window === 'undefined') {
+    // Server-side: return new client each time
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
+  
+  // Client-side: return singleton
+  if (!browserClient) {
+    browserClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+  }
+  return browserClient;
 }
+
+// Server client for API routes
+export function createSupabaseServerClient(): SupabaseClient {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.warn('SUPABASE_SERVICE_ROLE_KEY not set, using anon key');
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return createClient(SUPABASE_URL, serviceKey);
+}
+
+export { SUPABASE_URL, SUPABASE_ANON_KEY };
