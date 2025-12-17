@@ -3,10 +3,10 @@
 // CRAV Scrapbook - Main Editor Page
 // Complete scrapbooking editor with all features and onboarding
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useScrapbookStore } from '@/lib/store';
+import { useScrapbookStore, createPhotoElement, createTextElement } from '@/lib/store';
 import { EditorToolbar } from '@/components/editor/EditorToolbar';
 import { EditorCanvas } from '@/components/editor/EditorCanvas';
 import { AssetsPanel } from '@/components/editor/AssetsPanel';
@@ -66,6 +66,9 @@ export default function EditorPage() {
   const params = useParams();
   const scrapbookId = params?.scrapbookId as string;
 
+  // Hidden file input for photo uploads
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [showPagesPanel, setShowPagesPanel] = useState(true);
@@ -82,6 +85,7 @@ export default function EditorPage() {
     setSaving,
     setLastSaved,
     getCurrentPage,
+    addElement,
   } = useScrapbookStore();
 
   // Check for first-time user
@@ -157,6 +161,46 @@ export default function EditorPage() {
     }
   };
 
+  // Handle photo upload from empty canvas prompt
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    const currentPage = getCurrentPage();
+    if (!files || !currentPage) return;
+    
+    Array.from(files).forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const src = event.target?.result as string;
+        const img = new window.Image();
+        img.onload = () => {
+          const maxW = currentPage.width * 0.5;
+          const maxH = currentPage.height * 0.5;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxW) { h = (maxW / w) * h; w = maxW; }
+          if (h > maxH) { w = (maxH / h) * w; h = maxH; }
+          addElement(createPhotoElement(src, { x: 50 + (index * 30), y: 50 + (index * 30) }, { width: w, height: h }));
+        };
+        img.src = src;
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  // Add photo handler - triggers file picker
+  const handleAddPhoto = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Add text handler
+  const handleAddText = () => {
+    const currentPage = getCurrentPage();
+    if (currentPage) {
+      addElement(createTextElement('Double-click to edit', { x: currentPage.width / 2 - 100, y: currentPage.height / 2 - 25 }));
+    }
+  };
+
   const currentPage = getCurrentPage();
   const isCanvasEmpty = currentPage && currentPage.elements.length === 0;
 
@@ -200,6 +244,16 @@ export default function EditorPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      {/* Hidden file input for photo uploads */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handlePhotoUpload}
+        className="hidden"
+      />
+
       {/* Header */}
       <header className="h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-4 shrink-0">
         <button onClick={() => router.push('/dashboard')} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Back to Dashboard">
@@ -280,12 +334,12 @@ export default function EditorPage() {
           <div className="flex-1 relative">
             <EditorCanvas />
             
-            {/* Empty canvas prompt */}
+            {/* Empty canvas prompt - NOW WITH WORKING CALLBACKS */}
             <AnimatePresence>
               {isCanvasEmpty && (
                 <EmptyCanvasPrompt
-                  onAddPhoto={() => {}}
-                  onAddText={() => {}}
+                  onAddPhoto={handleAddPhoto}
+                  onAddText={handleAddText}
                   onBrowseTemplates={() => setShowLeftPanel(true)}
                 />
               )}
