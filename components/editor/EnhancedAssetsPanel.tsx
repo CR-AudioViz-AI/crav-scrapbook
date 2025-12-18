@@ -15,25 +15,25 @@ import {
 } from 'lucide-react';
 
 // Lazy load heavy components for better performance
-// Components use default exports
-const StockPhotoBrowser = lazy(() => import('./StockPhotoBrowser'));
-const GiphyBrowser = lazy(() => import('./GiphyBrowser'));
-const IconsBrowser = lazy(() => import('./IconsBrowser'));
-const GradientsBrowser = lazy(() => import('./GradientsBrowser'));
-const FiltersBrowser = lazy(() => import('./FiltersBrowser'));
-const FramesBrowser = lazy(() => import('./FramesBrowser'));
-const StickersBrowser = lazy(() => import('./StickersBrowser'));
-const ShapesBrowser = lazy(() => import('./ShapesBrowser'));
-const QRCodeGenerator = lazy(() => import('./QRCodeGenerator'));
-const AvatarCreator = lazy(() => import('./AvatarCreator'));
-const CollageBuilder = lazy(() => import('./CollageBuilder'));
-const BackgroundPicker = lazy(() => import('./BackgroundPicker'));
-const PatternPicker = lazy(() => import('./PatternPicker'));
-const ColorPalettePicker = lazy(() => import('./ColorPalettePicker'));
-const TextEffectsPanel = lazy(() => import('./TextEffectsPanel'));
-const TemplateGallery = lazy(() => import('./TemplateGallery'));
-const PremiumStore = lazy(() => import('./PremiumStore'));
-const AIEnhancePanel = lazy(() => import('./AIEnhancePanel'));
+// Components use named exports, so we convert them to default exports for React.lazy
+const StockPhotoBrowser = lazy(() => import('./StockPhotoBrowser').then(mod => ({ default: mod.StockPhotoBrowser })));
+const GiphyBrowser = lazy(() => import('./GiphyBrowser').then(mod => ({ default: mod.GiphyBrowser })));
+const IconsBrowser = lazy(() => import('./IconsBrowser').then(mod => ({ default: mod.default })));
+const GradientsBrowser = lazy(() => import('./GradientsBrowser').then(mod => ({ default: mod.default })));
+const FiltersBrowser = lazy(() => import('./FiltersBrowser').then(mod => ({ default: mod.default })));
+const FramesBrowser = lazy(() => import('./FramesBrowser').then(mod => ({ default: mod.default })));
+const StickersBrowser = lazy(() => import('./StickersBrowser').then(mod => ({ default: mod.default })));
+const ShapesBrowser = lazy(() => import('./ShapesBrowser').then(mod => ({ default: mod.default })));
+const QRCodeGenerator = lazy(() => import('./QRCodeGenerator').then(mod => ({ default: mod.default })));
+const AvatarCreator = lazy(() => import('./AvatarCreator').then(mod => ({ default: mod.default })));
+const CollageBuilder = lazy(() => import('./CollageBuilder').then(mod => ({ default: mod.default })));
+const BackgroundPicker = lazy(() => import('./BackgroundPicker').then(mod => ({ default: mod.default })));
+const PatternPicker = lazy(() => import('./PatternPicker').then(mod => ({ default: mod.default })));
+const ColorPalettePicker = lazy(() => import('./ColorPalettePicker').then(mod => ({ default: mod.default })));
+const TextEffectsPanel = lazy(() => import('./TextEffectsPanel').then(mod => ({ default: mod.default })));
+const TemplateGallery = lazy(() => import('./TemplateGallery').then(mod => ({ default: mod.TemplateGallery })));
+const PremiumStore = lazy(() => import('./PremiumStore').then(mod => ({ default: mod.default })));
+const AIEnhancePanel = lazy(() => import('./AIEnhancePanel').then(mod => ({ default: mod.AIEnhancePanel })));
 
 // Category definitions
 type CategoryId = 'media' | 'elements' | 'design' | 'tools' | 'premium';
