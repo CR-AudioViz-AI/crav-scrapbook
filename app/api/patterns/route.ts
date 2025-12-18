@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
     filteredPatterns = filteredPatterns.filter(p => !p.premium);
   }
   
-  const categories = [...new Set(patterns.map(p => p.category))];
+  const categories = Array.from(new Set(patterns.map(p => p.category)));
   
   return NextResponse.json({
     patterns: filteredPatterns.map(p => ({
