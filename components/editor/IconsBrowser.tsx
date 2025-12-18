@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useScrapbookStore, createStickerElement } from '@/lib/store';
 import { 
   Search, Loader2, Download, Check, Palette,
-  ArrowRight, Shapes, MessageCircle, Cloud, Leaf, Paw, Gift, Plane, Coffee, Camera, Users
+  ArrowRight, Shapes, MessageCircle, Cloud, Leaf, Dog, Gift, Plane, Coffee, Camera, Users
 } from 'lucide-react';
 
 interface Icon {
@@ -25,7 +25,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
   communication: <MessageCircle className="w-4 h-4" />,
   weather: <Cloud className="w-4 h-4" />,
   nature: <Leaf className="w-4 h-4" />,
-  animals: <Paw className="w-4 h-4" />,
+  animals: <Dog className="w-4 h-4" />,
   celebration: <Gift className="w-4 h-4" />,
   travel: <Plane className="w-4 h-4" />,
   food: <Coffee className="w-4 h-4" />,
