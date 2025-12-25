@@ -1,20 +1,21 @@
-import type { Metadata } from 'next'
+import Script from 'next/script';
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { AuthProvider } from '@/components/AuthProvider'
-import { Toaster } from '@/components/ui/Toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'CRAVScrapbook - Ultimate Digital Scrapbooking Platform',
-  description: 'Create beautiful digital scrapbooks with AI-powered tools. Preserve memories, tell stories, and share with loved ones.',
-  keywords: 'scrapbooking, digital scrapbook, memory keeping, photo album, family memories, journaling',
-  openGraph: {
-    title: 'CRAVScrapbook - Your Story. Our Design.',
-    description: 'The most powerful digital scrapbooking platform with AI assistance.',
-    images: ['/og-image.png'],
-  },
+  description: 'Part of the CR AudioViz AI creative ecosystem',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -25,13 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Abril+Fatface&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="format-detection" content="telephone=no" />
       </head>
-      <body className={`${inter.className} bg-scrapbook-cream min-h-screen`}>
-        <AuthProvider>
+      <body className={`${inter.className} min-h-screen min-h-[100dvh]`}>
+        <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100">
           {children}
-          <Toaster />
-        </AuthProvider>
+        </div>
+        <Script src="https://javariai.com/embed.js" strategy="lazyOnload" />
       </body>
     </html>
   )
