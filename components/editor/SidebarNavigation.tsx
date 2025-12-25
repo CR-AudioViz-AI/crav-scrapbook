@@ -1,11 +1,11 @@
 // components/editor/SidebarNavigation.tsx
-// Complete Sidebar Navigation - Wires All Components
-// Timestamp: Tuesday, December 24, 2025 – 4:40 PM Eastern Time
+// Complete Sidebar Navigation with lazy loading
+// Timestamp: Tuesday, December 24, 2025 – 5:00 PM Eastern Time
 // CR AudioViz AI - "Your Story. Our Design"
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import {
   Image,
   Scissors,
@@ -29,47 +29,48 @@ import {
   Camera,
   Search,
   ChevronRight,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
-// Import all browser components
-import UnsplashBrowser from './UnsplashBrowser';
-import PexelsBrowser from './PexelsBrowser';
-import PixabayBrowser from './PixabayBrowser';
-import GiphyStickerBrowser from './GiphyStickerBrowser';
-import BackgroundRemover from './BackgroundRemover';
-import PhotoEnhancer from './PhotoEnhancer';
-import ColorPaletteGenerator from './ColorPaletteGenerator';
-import DieCutsBrowser from './DieCutsBrowser';
-import AlphabetsBrowser from './AlphabetsBrowser';
-import JournalingCardsBrowser from './JournalingCardsBrowser';
-import SeasonalThemesBrowser from './SeasonalThemesBrowser';
-import QuotesBrowser from './QuotesBrowser';
-import PageBordersBrowser from './PageBordersBrowser';
-import PhotoMatsBrowser from './PhotoMatsBrowser';
-import WashiTapeBrowser from './WashiTapeBrowser';
-import TagsBrowser from './TagsBrowser';
-import DateStampsBrowser from './DateStampsBrowser';
-import IconsBrowserPro from './IconsBrowserPro';
-import ClipArtBrowser from './ClipArtBrowser';
-import WordArtGenerator from './WordArtGenerator';
-import TexturesBrowser from './TexturesBrowser';
-import TemplateLayoutEngine from './TemplateLayoutEngine';
-import OverlaysBrowser from './OverlaysBrowser';
-import PrintExportModal from './PrintExportModal';
-import SocialShareModal from './SocialShareModal';
-import AttributionTracker from './AttributionTracker';
+// Lazy load all components for better performance
+const UnsplashBrowser = lazy(() => import('./UnsplashBrowser'));
+const PexelsBrowser = lazy(() => import('./PexelsBrowser'));
+const PixabayBrowser = lazy(() => import('./PixabayBrowser'));
+const GiphyStickerBrowser = lazy(() => import('./GiphyStickerBrowser'));
+const BackgroundRemover = lazy(() => import('./BackgroundRemover'));
+const PhotoEnhancer = lazy(() => import('./PhotoEnhancer'));
+const ColorPaletteGenerator = lazy(() => import('./ColorPaletteGenerator'));
+const DieCutsBrowser = lazy(() => import('./DieCutsBrowser'));
+const AlphabetsBrowser = lazy(() => import('./AlphabetsBrowser'));
+const JournalingCardsBrowser = lazy(() => import('./JournalingCardsBrowser'));
+const SeasonalThemesBrowser = lazy(() => import('./SeasonalThemesBrowser'));
+const QuotesBrowser = lazy(() => import('./QuotesBrowser'));
+const PageBordersBrowser = lazy(() => import('./PageBordersBrowser'));
+const PhotoMatsBrowser = lazy(() => import('./PhotoMatsBrowser'));
+const WashiTapeBrowser = lazy(() => import('./WashiTapeBrowser'));
+const TagsBrowser = lazy(() => import('./TagsBrowser'));
+const DateStampsBrowser = lazy(() => import('./DateStampsBrowser'));
+const IconsBrowserPro = lazy(() => import('./IconsBrowserPro'));
+const ClipArtBrowser = lazy(() => import('./ClipArtBrowser'));
+const WordArtGenerator = lazy(() => import('./WordArtGenerator'));
+const TexturesBrowser = lazy(() => import('./TexturesBrowser'));
+const OverlaysBrowser = lazy(() => import('./OverlaysBrowser'));
+const TemplateLayoutEngine = lazy(() => import('./TemplateLayoutEngine'));
+const PrintExportModal = lazy(() => import('./PrintExportModal'));
+const SocialShareModal = lazy(() => import('./SocialShareModal'));
+const AttributionTracker = lazy(() => import('./AttributionTracker'));
 
 interface NavItem {
   id: string;
   name: string;
   icon: React.ComponentType<{ className?: string }>;
-  component: React.ComponentType<any>;
+  component: React.LazyExoticComponent<React.ComponentType<any>>;
   category: string;
   badge?: string;
 }
 
-// All navigation items organized by category
+// Navigation items
 const NAV_ITEMS: NavItem[] = [
   // PHOTOS & MEDIA
   { id: 'unsplash', name: 'Unsplash Photos', icon: Image, component: UnsplashBrowser, category: 'photos', badge: '3M+' },
@@ -123,6 +124,15 @@ const CATEGORIES = [
   { id: 'export', name: 'Export', icon: Download },
 ];
 
+// Loading fallback
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+    </div>
+  );
+}
+
 interface SidebarNavigationProps {
   onElementAdd?: (element: any) => void;
 }
@@ -132,12 +142,10 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
   const [expandedCategory, setExpandedCategory] = useState<string>('photos');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter items by search
   const filteredItems = NAV_ITEMS.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get active component
   const activeItem = NAV_ITEMS.find(item => item.id === activePanel);
   const ActiveComponent = activeItem?.component;
 
@@ -162,7 +170,6 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
         {/* Categories */}
         <div className="flex-1 overflow-y-auto">
           {searchQuery ? (
-            // Search results
             <div className="p-2">
               {filteredItems.map(item => {
                 const Icon = item.icon;
@@ -171,17 +178,13 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
                     key={item.id}
                     onClick={() => setActivePanel(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                      activePanel === item.id
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'hover:bg-gray-50 text-gray-700'
+                      activePanel === item.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     <span className="flex-1 text-sm font-medium truncate">{item.name}</span>
                     {item.badge && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">
-                        {item.badge}
-                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">{item.badge}</span>
                     )}
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                   </button>
@@ -189,7 +192,6 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
               })}
             </div>
           ) : (
-            // Categorized view
             CATEGORIES.map(category => {
               const CategoryIcon = category.icon;
               const categoryItems = NAV_ITEMS.filter(item => item.category === category.id);
@@ -202,13 +204,9 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
                     className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-50 transition-colors"
                   >
                     <CategoryIcon className="w-4 h-4 text-gray-500" />
-                    <span className="flex-1 text-sm font-semibold text-gray-700 text-left">
-                      {category.name}
-                    </span>
+                    <span className="flex-1 text-sm font-semibold text-gray-700 text-left">{category.name}</span>
                     <span className="text-xs text-gray-400">{categoryItems.length}</span>
-                    <ChevronRight 
-                      className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
-                    />
+                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                   </button>
 
                   {isExpanded && (
@@ -229,12 +227,8 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
                             <span className="flex-1 text-sm truncate">{item.name}</span>
                             {item.badge && (
                               <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                item.badge === 'AI' 
-                                  ? 'bg-purple-100 text-purple-700' 
-                                  : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {item.badge}
-                              </span>
+                                item.badge === 'AI' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
+                              }`}>{item.badge}</span>
                             )}
                           </button>
                         );
@@ -247,7 +241,7 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
           )}
         </div>
 
-        {/* Footer Stats */}
+        {/* Footer */}
         <div className="p-3 border-t bg-gray-50">
           <div className="text-center">
             <p className="text-xs font-medium text-gray-500">CR AudioViz AI</p>
@@ -259,23 +253,16 @@ export default function SidebarNavigation({ onElementAdd }: SidebarNavigationPro
       {/* Active Panel */}
       {activePanel && ActiveComponent && (
         <div className="w-80 bg-white border-r flex flex-col">
-          {/* Panel Header */}
           <div className="flex items-center justify-between p-3 border-b">
             <h3 className="font-semibold text-gray-900">{activeItem?.name}</h3>
-            <button
-              onClick={() => setActivePanel(null)}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
+            <button onClick={() => setActivePanel(null)} className="p-1 hover:bg-gray-100 rounded">
               <X className="w-4 h-4 text-gray-500" />
             </button>
           </div>
-
-          {/* Panel Content */}
           <div className="flex-1 overflow-hidden">
-            <ActiveComponent 
-              onAddToCanvas={onElementAdd}
-              onSelectElement={onElementAdd}
-            />
+            <Suspense fallback={<LoadingFallback />}>
+              <ActiveComponent onAddToCanvas={onElementAdd} onSelectElement={onElementAdd} />
+            </Suspense>
           </div>
         </div>
       )}
