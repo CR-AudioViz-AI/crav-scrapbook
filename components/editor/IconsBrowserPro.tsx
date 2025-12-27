@@ -72,7 +72,7 @@ import {
   Calendar,
   Clock,
   Timer,
-  Alarm,
+  AlarmClock,
   Check,
   X,
   Plus,
@@ -353,3 +353,4 @@ export default function IconsBrowserPro({ onSelectIcon, onAddToCanvas }: IconsBr
     </div>
   );
 }
+
